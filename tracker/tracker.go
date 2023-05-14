@@ -13,7 +13,7 @@ import (
 
 type usageTracker struct {
 	rule          UsageLimitRule
-	authenticator socks5.UserPassAuthenticator
+	authenticator socks5.Authenticator
 	bufferPool    bufferpool.BufPool
 
 	perUserLimit int
@@ -35,7 +35,7 @@ type UsageTracker interface {
 	HasUserLimitExceeded(user string) bool
 }
 
-func NewUsageTracker(perUserLimit, globalLimit int, authenticator socks5.UserPassAuthenticator) UsageTracker {
+func NewUsageTracker(perUserLimit, globalLimit int, authenticator socks5.Authenticator) UsageTracker {
 	usageTracker := &usageTracker{
 		authenticator: authenticator,
 		bufferPool:    bufferpool.NewPool(10_000_000),
