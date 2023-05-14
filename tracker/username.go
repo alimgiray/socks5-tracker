@@ -15,6 +15,8 @@ func PutUsername(ctx context.Context, username string) context.Context {
 	return ctx
 }
 
-func GetUsername(ctx context.Context) string {
-	return ctx.Value(usernameKey).(string)
+func GetUsername(ctx context.Context) (string, bool) {
+	value := ctx.Value(usernameKey)
+	username, ok := value.(string)
+	return username, ok
 }

@@ -2,6 +2,7 @@ package tracker
 
 import (
 	"context"
+	"errors"
 	"net"
 )
 
@@ -11,5 +12,10 @@ func (u *usageTracker) Dial(ctx context.Context, network, addr string) (net.Conn
 		return nil, err
 	}
 
-	return &usageConn{Conn: conn, user: GetUsername(ctx), Tracker: u}, nil
+	username, ok := GetUsername(ctx)
+	if !ok {
+		return nil, errors.New("username is missing")
+	}
+
+	return &usageConn{Conn: conn, user: username, Tracker: u}, nil
 }
