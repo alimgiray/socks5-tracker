@@ -33,6 +33,7 @@ type UsageTracker interface {
 	LogUsage(interval int)
 	HasGlobalLimitExceeded() bool
 	HasUserLimitExceeded(user string) bool
+	Observe(port string)
 }
 
 func NewUsageTracker(perUserLimit, globalLimit int, authenticator socks5.Authenticator) UsageTracker {
@@ -69,10 +70,23 @@ func (u *usageTracker) BufferPool() bufferpool.BufPool {
 // interval is time in seconds
 func (u *usageTracker) LogUsage(interval int) {
 	for range time.Tick(time.Duration(interval) * time.Second) {
-		log.Println("Global usage:", u.globalUsage)
-		for user, usage := range u.perUserUsage {
+		l := u.getLogs()
+		log.Println("Global usage:", l.GlobalUsage)
+		for user, usage := range l.PerUser {
 			log.Printf("User %s used %d bytes", user, usage)
 		}
+	}
+}
+
+type logs struct {
+	GlobalUsage uint64            `json:"global"`
+	PerUser     map[string]uint64 `json:"perUser"`
+}
+
+func (u *usageTracker) getLogs() logs {
+	return logs{
+		GlobalUsage: u.globalUsage,
+		PerUser:     u.perUserUsage,
 	}
 }
 

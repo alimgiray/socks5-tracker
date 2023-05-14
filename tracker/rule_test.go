@@ -62,6 +62,10 @@ func (m *MockUsageTracker) LogUsage(interval int) {
 	m.Called(interval)
 }
 
+func (m *MockUsageTracker) Observe(port string) {
+	m.Called(port)
+}
+
 func TestAllowGlobalLimitExceeded(t *testing.T) {
 	mockTracker := new(MockUsageTracker)
 	rule := tracker.NewUsageLimitRule(mockTracker)
