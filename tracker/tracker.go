@@ -1,7 +1,10 @@
 package tracker
 
 import (
+	"context"
+	"io"
 	"log"
+	"net"
 	"time"
 
 	"github.com/things-go/go-socks5"
@@ -9,7 +12,7 @@ import (
 )
 
 type usageTracker struct {
-	rule          *usageLimitRule
+	rule          UsageLimitRule
 	authenticator socks5.UserPassAuthenticator
 	bufferPool    bufferpool.BufPool
 
@@ -20,7 +23,19 @@ type usageTracker struct {
 	perUserUsage map[string]uint64
 }
 
-func NewUsageTracker(perUserLimit, globalLimit int, authenticator socks5.UserPassAuthenticator) *usageTracker {
+type UsageTracker interface {
+	Dial(ctx context.Context, network, addr string) (net.Conn, error)
+	Connect(ctx context.Context, writer io.Writer, req *socks5.Request) error
+	Limit() socks5.RuleSet
+	TrackGlobal(size int)
+	TrackUser(user string, size int)
+	BufferPool() bufferpool.BufPool
+	LogUsage(interval int)
+	HasGlobalLimitExceeded() bool
+	HasUserLimitExceeded(user string) bool
+}
+
+func NewUsageTracker(perUserLimit, globalLimit int, authenticator socks5.UserPassAuthenticator) UsageTracker {
 	usageTracker := &usageTracker{
 		authenticator: authenticator,
 		bufferPool:    bufferpool.NewPool(10_000_000),
@@ -52,7 +67,7 @@ func (u *usageTracker) BufferPool() bufferpool.BufPool {
 
 // TrackUsage periodically prints global usage and per user usage to the console
 // interval is time in seconds
-func (u *usageTracker) TrackUsage(interval int) {
+func (u *usageTracker) LogUsage(interval int) {
 	for range time.Tick(time.Duration(interval) * time.Second) {
 		log.Println("Global usage:", u.globalUsage)
 		for user, usage := range u.perUserUsage {

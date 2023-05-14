@@ -28,7 +28,7 @@ func main() {
 		}),
 	)
 
-	go usageTracker.TrackUsage(trackingIntervalInSeconds)
+	go usageTracker.LogUsage(trackingIntervalInSeconds)
 
 	if err := server.ListenAndServe("tcp", ":8000"); err != nil {
 		panic(err)

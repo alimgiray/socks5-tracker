@@ -8,7 +8,17 @@ import (
 )
 
 type usageLimitRule struct {
-	tracker *usageTracker
+	tracker UsageTracker
+}
+
+type UsageLimitRule interface {
+	Allow(ctx context.Context, req *socks5.Request) (context.Context, bool)
+}
+
+func NewUsageLimitRule(tracker UsageTracker) UsageLimitRule {
+	return &usageLimitRule{
+		tracker: tracker,
+	}
 }
 
 func (r *usageLimitRule) Allow(ctx context.Context, req *socks5.Request) (context.Context, bool) {
