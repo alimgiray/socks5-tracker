@@ -16,54 +16,54 @@ import (
 
 var usernameKey = "username"
 
-type mockUsageTracker struct {
+type MockUsageTracker struct {
 	mock.Mock
 }
 
-func (m *mockUsageTracker) HasGlobalLimitExceeded() bool {
+func (m *MockUsageTracker) HasGlobalLimitExceeded() bool {
 	args := m.Called()
 	return args.Bool(0)
 }
 
-func (m *mockUsageTracker) HasUserLimitExceeded(user string) bool {
+func (m *MockUsageTracker) HasUserLimitExceeded(user string) bool {
 	args := m.Called(user)
 	return args.Bool(0)
 }
 
-func (m *mockUsageTracker) Dial(ctx context.Context, network, addr string) (net.Conn, error) {
+func (m *MockUsageTracker) Dial(ctx context.Context, network, addr string) (net.Conn, error) {
 	args := m.Called(ctx, network, addr)
 	return args.Get(0).(net.Conn), args.Error(1)
 }
 
-func (m *mockUsageTracker) Connect(ctx context.Context, writer io.Writer, req *socks5.Request) error {
+func (m *MockUsageTracker) Connect(ctx context.Context, writer io.Writer, req *socks5.Request) error {
 	args := m.Called(ctx, writer, req)
 	return args.Error(0)
 }
 
-func (m *mockUsageTracker) Limit() socks5.RuleSet {
+func (m *MockUsageTracker) Limit() socks5.RuleSet {
 	args := m.Called()
 	return args.Get(0).(socks5.RuleSet)
 }
 
-func (m *mockUsageTracker) TrackGlobal(size int) {
+func (m *MockUsageTracker) TrackGlobal(size int) {
 	m.Called(size)
 }
 
-func (m *mockUsageTracker) TrackUser(user string, size int) {
+func (m *MockUsageTracker) TrackUser(user string, size int) {
 	m.Called(user, size)
 }
 
-func (m *mockUsageTracker) BufferPool() bufferpool.BufPool {
+func (m *MockUsageTracker) BufferPool() bufferpool.BufPool {
 	args := m.Called()
 	return args.Get(0).(bufferpool.BufPool)
 }
 
-func (m *mockUsageTracker) LogUsage(interval int) {
+func (m *MockUsageTracker) LogUsage(interval int) {
 	m.Called(interval)
 }
 
 func TestAllowGlobalLimitExceeded(t *testing.T) {
-	mockTracker := new(mockUsageTracker)
+	mockTracker := new(MockUsageTracker)
 	rule := tracker.NewUsageLimitRule(mockTracker)
 
 	mockTracker.On("HasGlobalLimitExceeded").Return(true)
@@ -72,7 +72,7 @@ func TestAllowGlobalLimitExceeded(t *testing.T) {
 }
 
 func TestAllowUserLimitExceeded(t *testing.T) {
-	mockTracker := new(mockUsageTracker)
+	mockTracker := new(MockUsageTracker)
 	rule := tracker.NewUsageLimitRule(mockTracker)
 
 	mockTracker.On("HasGlobalLimitExceeded").Return(false)
@@ -82,7 +82,7 @@ func TestAllowUserLimitExceeded(t *testing.T) {
 }
 
 func TestAllowNoLimitExceeded(t *testing.T) {
-	mockTracker := new(mockUsageTracker)
+	mockTracker := new(MockUsageTracker)
 	rule := tracker.NewUsageLimitRule(mockTracker)
 
 	mockTracker.On("HasGlobalLimitExceeded").Return(false)

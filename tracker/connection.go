@@ -7,7 +7,15 @@ import (
 type usageConn struct {
 	net.Conn
 	user    string
-	Tracker *usageTracker
+	Tracker UsageTracker
+}
+
+type UsageConn interface {
+	Read(b []byte) (n int, err error)
+}
+
+func NewUsageConn(conn net.Conn, user string, tracker UsageTracker) UsageConn {
+	return &usageConn{conn, user, tracker}
 }
 
 func (c *usageConn) Read(b []byte) (n int, err error) {
