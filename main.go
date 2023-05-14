@@ -10,10 +10,10 @@ func main() {
 
 	perUserLimit := 2 * 1024 * 1024
 	globalLimit := 5 * 1024 * 1024
+	trackingIntervalInSeconds := 3
 
-	credentials := NewStaticCredentials()
 	authenticator := socks5.UserPassAuthenticator{
-		Credentials: credentials,
+		Credentials: NewStaticCredentials(),
 	}
 
 	usageTracker := tracker.NewUsageTracker(perUserLimit, globalLimit, authenticator)
@@ -28,7 +28,7 @@ func main() {
 		}),
 	)
 
-	go usageTracker.TrackUsage()
+	go usageTracker.TrackUsage(trackingIntervalInSeconds)
 
 	if err := server.ListenAndServe("tcp", ":8000"); err != nil {
 		panic(err)
